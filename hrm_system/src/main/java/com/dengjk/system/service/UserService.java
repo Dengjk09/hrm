@@ -18,7 +18,7 @@ public interface UserService {
      */
     Result addUser(BsUser bsUser);
 
-    Result findUserById(Long id);
+    Result findUserById(String id);
 
-    Result deleteUserById(Long id);
+    Result deleteUserById(String id);
 }

@@ -39,13 +39,13 @@ public class UserServiceImpl implements UserService {
      * @return
      */
     @Override
-    public Result findUserById(Long id) {
+    public Result findUserById(String id) {
         return ResultUtil.success(userRepository.findById(id));
     }
 
 
     @Override
-    public Result deleteUserById(Long id) {
+    public Result deleteUserById(String id) {
         userRepository.deleteById(id);
         return ResultUtil.success("删除成功");
     }

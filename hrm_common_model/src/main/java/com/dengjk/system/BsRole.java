@@ -36,7 +36,7 @@ public class BsRole implements java.io.Serializable {
     @GenericGenerator(name = "role", strategy = "com.dengjk.common.utils.IdGenerator",
             parameters = {@org.hibernate.annotations.Parameter(name = "dataCenterID", value = "20") ,
                     @org.hibernate.annotations.Parameter(name = "workerId", value = "10")})
-    private Long id;
+    private String id;
 
     /**
      * 手机号码

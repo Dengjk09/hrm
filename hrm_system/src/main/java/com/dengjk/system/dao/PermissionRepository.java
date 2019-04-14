@@ -9,5 +9,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
  * @create 2019-04-14 19:14
  * @desc
  **/
-public interface PermissionRepository extends JpaRepository<BsPermission, Long>, JpaSpecificationExecutor<BsPermission> {
+public interface PermissionRepository extends JpaRepository<BsPermission, String>, JpaSpecificationExecutor<BsPermission> {
 }

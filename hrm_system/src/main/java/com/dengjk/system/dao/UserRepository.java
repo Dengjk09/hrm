@@ -9,5 +9,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
  * @create 2019-04-14 19:14
  * @desc
  **/
-public interface UserRepository extends JpaRepository<BsUser, Long>, JpaSpecificationExecutor<BsUser> {
+public interface UserRepository extends JpaRepository<BsUser, String>, JpaSpecificationExecutor<BsUser> {
 }

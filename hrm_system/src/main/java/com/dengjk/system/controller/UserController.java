@@ -12,7 +12,10 @@ import org.springframework.web.bind.annotation.*;
  * @author Dengjk
  * @create 2019-04-14 19:19
  * @desc 操作用户控制层
+ * CrossOrigin解决跨域问题
+ *
  **/
+@CrossOrigin
 @RestController
 @RequestMapping("/sys/user")
 @Api(value = "操作用户", description = "操作用户desc")
@@ -31,13 +34,13 @@ public class UserController {
 
     @GetMapping("/findUserById/{id}")
     @ApiOperation("根据id查询用户")
-    public Result findUserById(@PathVariable(value = "id") Long id) {
+    public Result findUserById(@PathVariable(value = "id") String id) {
         return userService.findUserById(id);
     }
 
     @DeleteMapping("/deleteUserById/{id}")
     @ApiOperation("根据id删除用户")
-    public Result deleteUserById(@PathVariable(value = "id")Long id){
+    public Result deleteUserById(@PathVariable(value = "id")String id){
         return userService.deleteUserById(id);
     }
 }
