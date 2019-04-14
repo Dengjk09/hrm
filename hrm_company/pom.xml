@@ -43,7 +43,6 @@
             <version>${druid-version}</version>
         </dependency>
 
-
         <!--swagger-->
         <dependency>
             <groupId>io.springfox</groupId>
