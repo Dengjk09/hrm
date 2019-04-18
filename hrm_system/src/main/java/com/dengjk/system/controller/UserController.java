@@ -8,12 +8,13 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 /**
  * @author Dengjk
  * @create 2019-04-14 19:19
  * @desc 操作用户控制层
  * CrossOrigin解决跨域问题
- *
  **/
 @CrossOrigin
 @RestController
@@ -40,7 +41,13 @@ public class UserController {
 
     @DeleteMapping("/deleteUserById/{id}")
     @ApiOperation("根据id删除用户")
-    public Result deleteUserById(@PathVariable(value = "id")String id){
+    public Result deleteUserById(@PathVariable(value = "id") String id) {
         return userService.deleteUserById(id);
+    }
+
+    @PostMapping("/assignRoles")
+    @ApiOperation("给用户分配角色,两个参数,用户的id userId , 角色的id集合 roleIds")
+    public Result assignRoles(Map<String, Object> dataMap) {
+        return userService.assignRoles(dataMap);
     }
 }

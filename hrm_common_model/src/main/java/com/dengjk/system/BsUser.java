@@ -1,7 +1,6 @@
 package com.dengjk.system;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -11,8 +10,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
 /**
  * BS_USER
@@ -159,6 +157,6 @@ public class BsUser implements java.io.Serializable {
         name = "bs_user_role", joinColumns = {@JoinColumn(name = "user_id",referencedColumnName = "id")},
             inverseJoinColumns = {@JoinColumn(name = "role_id",referencedColumnName = "id")}
     )
-    private List<BsRole> roles;
+    private Set<BsRole> roles;
 
 }

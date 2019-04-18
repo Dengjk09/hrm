@@ -33,7 +33,7 @@ public class PePermissionMenu implements java.io.Serializable {
     /** 主键 */
     @Id
     @Column(name = "ID", unique = true, nullable = false, length = 19)
-    private Long id;
+    private String id;
 
     /** 菜单图标 */
     @Column(name = "MENU_ICON", nullable = false, length = 255)

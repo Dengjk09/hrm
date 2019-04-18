@@ -7,8 +7,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
 /**
  * 角色表(BS_ROLE)
@@ -63,7 +62,7 @@ public class BsRole implements java.io.Serializable {
 
     @ManyToMany(mappedBy = "roles")
     @JsonIgnore
-    private List<BsUser> users;
+    private Set<BsUser> users;
 
 
     /**
@@ -78,7 +77,7 @@ public class BsRole implements java.io.Serializable {
             name = "bs_role_permission", joinColumns = {@JoinColumn(name = "role_id", referencedColumnName = "id")},
             inverseJoinColumns = {@JoinColumn(name = "permission_id", referencedColumnName = "id")}
     )
-    private List<BsPermission> roles;
+    private Set<BsPermission> roles;
 
 
 }

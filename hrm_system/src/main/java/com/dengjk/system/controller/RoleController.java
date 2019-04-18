@@ -9,6 +9,8 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 /**
  * @author Dengjk
  * @create 2019-04-14 19:19
@@ -43,5 +45,11 @@ public class RoleController {
     @ApiOperation("根据id删除用户")
     public Result deleteRoleById(@PathVariable(value = "id")String id){
         return roleService.deleteRoleById(id);
+    }
+
+    @PostMapping("/assignPermissions")
+    @ApiOperation("给角色赋值权限,用户的roleId, 角色的id集合permIds")
+    public Result assignRoles(Map<String, Object> dataMap) {
+        return roleService.assignPermissions(dataMap);
     }
 }

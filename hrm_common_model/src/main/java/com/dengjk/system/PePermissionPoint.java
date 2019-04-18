@@ -22,7 +22,7 @@ public class PePermissionPoint implements java.io.Serializable {
     /** 主键 */
     @Id
     @Column(name = "ID", unique = true, nullable = false, length = 19)
-    private Long id;
+    private String id;
 
     /** 按钮图标 */
     @Column(name = "POINT_CLASS", nullable = false, length = 255)

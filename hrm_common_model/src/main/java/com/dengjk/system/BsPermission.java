@@ -3,9 +3,11 @@ package com.dengjk.system;
 import lombok.Data;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 /**
  * 权限表(BS_PERMISSION)
@@ -29,10 +31,10 @@ public class BsPermission implements java.io.Serializable {
      */
     @Id
     @Column(name = "ID", unique = true, nullable = false, length = 19)
-    @GeneratedValue(generator = "permission")
+   /* @GeneratedValue(generator = "permission")
     @GenericGenerator(name = "permission", strategy = "com.dengjk.common.utils.IdGenerator",
             parameters = {@org.hibernate.annotations.Parameter(name = "dataCenterID", value = "20"),
-                    @org.hibernate.annotations.Parameter(name = "workerId", value = "10")})
+                    @org.hibernate.annotations.Parameter(name = "workerId", value = "10")})*/
     private String id;
 
     /**
@@ -65,6 +67,7 @@ public class BsPermission implements java.io.Serializable {
     @Column(name = "PID", nullable = true, length = 11)
     private String pid;
 
+    /**是否企业可见*/
     @Column(name = "en_visible")
     private Integer enVisible;
 

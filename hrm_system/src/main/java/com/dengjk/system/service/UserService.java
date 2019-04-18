@@ -3,6 +3,8 @@ package com.dengjk.system.service;
 import com.dengjk.common.utils.Result;
 import com.dengjk.system.BsUser;
 
+import java.util.Map;
+
 /**
  * @author Dengjk
  * @create 2019-04-14 19:22
@@ -21,4 +23,6 @@ public interface UserService {
     Result findUserById(String id);
 
     Result deleteUserById(String id);
+
+    Result assignRoles(Map<String, Object> dataMap);
 }

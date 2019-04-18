@@ -7,7 +7,6 @@ PRIMARY KEY ( `id` )
 ) ENGINE = INNODB DEFAULT CHARSET = utf8;
 
 
-
 CREATE TABLE bs_user (
 id BIGINT ( 20 ) PRIMARY KEY COMMENT '主键',
 mobile VARCHAR ( 20 ) NOT NULL COMMENT '手机号码',
@@ -27,7 +26,7 @@ in_service_status INT ( 1 ) DEFAULT NULL COMMENT '在职状态,1,在职 2.离职
 company_id BIGINT ( 20 ) DEFAULT NULL COMMENT '企业id',
 company_name VARCHAR ( 225 ) DEFAULT NULL COMMENT '企业id',
 department_name VARCHAR ( 225 ) DEFAULT NULL COMMENT '部门名称'
-) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 comment '用户表'
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 comment '用户表';
 
 
 
@@ -36,11 +35,8 @@ id BIGINT ( 20 ) PRIMARY KEY COMMENT '主键',
 NAME VARCHAR ( 255 ) NOT NULL COMMENT '手机号码',
 descrition VARCHAR ( 255 ) NOT NULL COMMENT '角色描述',
 company_id BIGINT ( 20 ) DEFAULT NULL COMMENT '企业id'
-) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 comment '角色表'
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 comment '角色表';
 
-
-
-alter table bs_permission add COLUMN en_visible int(1) DEFAULT null  comment '企业可见性 0不可见,1可见' AFTER pid ;
 
 
 
@@ -52,7 +48,7 @@ CODE VARCHAR ( 11 ) DEFAULT NULL COMMENT '权限标志',
 descrition VARCHAR ( 255 ) NOT NULL COMMENT '权限描述',
 pid VARCHAR ( 11 ) DEFAULT NULL COMMENT '父级id（权限属于哪个菜单或者按钮）',
 en_visible INT ( 1 ) DEFAULT NULL COMMENT '企业可见性 0不可见,1可见'
-) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COMMENT '权限表'
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COMMENT '权限表';
 
 
 
@@ -62,7 +58,7 @@ id BIGINT ( 20 ) PRIMARY KEY COMMENT '主键',
 menu_icon VARCHAR ( 255 ) NOT NULL COMMENT '菜单图标',
 menu_order VARCHAR ( 255 ) NOT NULL COMMENT '排序号',
 descrition VARCHAR ( 255 ) NOT NULL COMMENT '菜单描述'
-) ENGINE = INNODB DEFAULT CHARSET = utf8mb4  comment '资源菜单表'
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4  comment '资源菜单表';
 
 
 
@@ -72,7 +68,7 @@ point_class VARCHAR ( 255 ) NOT NULL COMMENT '按钮图标',
 point_icon VARCHAR ( 255 ) NOT NULL COMMENT '排序号',
 point_status VARCHAR ( 255 ) NOT NULL COMMENT '按钮状态',
 descrition VARCHAR ( 255 ) NOT NULL COMMENT '按钮描述'
-) ENGINE = INNODB DEFAULT CHARSET = utf8mb4  comment '资源按钮表'
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4  comment '资源按钮表';
 
 
 
@@ -82,7 +78,7 @@ api_url VARCHAR ( 500 ) NOT NULL COMMENT '链接',
 api_method VARCHAR ( 255 ) NOT NULL COMMENT '请求类型',
 api_level VARCHAR ( 255 ) NOT NULL COMMENT '权限等级(1 为通用接口,2为需要认证接口)',
 descrition VARCHAR ( 255 ) NOT NULL COMMENT 'api描述'
-) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COMMENT '资源api表'
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COMMENT '资源api表';
 
 
 
