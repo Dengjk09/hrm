@@ -16,4 +16,9 @@ public interface PermissionRepository extends JpaRepository<BsPermission, String
 
     Set<BsPermission> findByIdIn(List<String> ids);
 
+
+    /**根据类型和id查询所有的权限*/
+    Set<BsPermission> findAllByPidInAndType(List<String> ids ,Integer type);
+
+
 }

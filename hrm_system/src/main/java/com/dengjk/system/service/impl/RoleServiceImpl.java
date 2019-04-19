@@ -1,12 +1,13 @@
 package com.dengjk.system.service.impl;
 
+import com.dengjk.common.constants.PermissionConstants;
 import com.dengjk.common.utils.Result;
+import com.dengjk.common.utils.ResultUtil;
 import com.dengjk.system.BsPermission;
 import com.dengjk.system.BsRole;
 import com.dengjk.system.dao.PermissionRepository;
 import com.dengjk.system.dao.RoleRepository;
 import com.dengjk.system.service.RoleService;
-import com.dengjk.system.service.UserService;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author Dengjk
@@ -33,7 +35,8 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public Result addRole(BsRole bsRole) {
-        return null;
+        roleRepository.save(bsRole);
+        return ResultUtil.success("操作成功");
     }
 
     @Override
@@ -58,22 +61,31 @@ public class RoleServiceImpl implements RoleService {
         String roleId = (String) dataMap.get("roleId");
         List<String> permIds = (List<String>) dataMap.get("permIds");
         BsRole bsRole = roleRepository.findById(roleId).get();
-        /**权限会有一个树形关系,前段给进来的可能会是最底下层级关系的权限,这个权限所有的父级也应该赋值给这个角色*/
         Set<BsPermission> bsPermissions = permissionRepository.findByIdIn(permIds);
         Set<BsPermission> newPermissions = Sets.newHashSet();
-        for (BsPermission bsPermission : bsPermissions) {
-            /**第一个层级的pid应该是为空的*/
-            if (StringUtils.isBlank(bsPermission.getPid())) {
-                /**直接加当前级*/
-                newPermissions.add(bsPermission);
-                continue;
-            }
-            String pid = bsPermission.getPid();
-            BsPermission bsPermission1 = permissionRepository.findById(pid).get();
-            if(StringUtils.isNoneBlank(bsPermission1.getPid())){
-                BsPermission bsPermission2 = permissionRepository.findById(bsPermission1.getPid()).get();
-            }
+        /**如果是这个权限底下有api权限,应该给赋值所有的api权限*/
+        List<String> ids = bsPermissions.stream().map(x -> x.getId()).collect(Collectors.toList());
+        /**通过当前权限的id 作为pid去查询这个权限下面所有的为api权限的资源*/
+        Set<BsPermission> allByPidInAndType = permissionRepository.findAllByPidInAndType(ids, PermissionConstants.PY_API);
+        newPermissions.addAll(bsPermissions);
+        newPermissions.addAll(allByPidInAndType);
+        bsRole.setPermissions(newPermissions);
+        roleRepository.save(bsRole);
+        return ResultUtil.success("操作成功");
+    }
+
+
+    /**
+     * 递归添加权限的上级,直到最顶级,pid为空
+     */
+    public void recursionAddPerm(Set<BsPermission> newPermissions, BsPermission bsPermission) {
+        if (StringUtils.isEmpty(bsPermission.getPid())) {
+            newPermissions.add(bsPermission);
+            return;
         }
-        return null;
+        /**先添加当前级别的,再递归,去找它的上级*/
+        newPermissions.add(bsPermission);
+        BsPermission bsPermission2 = permissionRepository.findById(bsPermission.getPid()).get();
+        this.recursionAddPerm(newPermissions, bsPermission2);
     }
 }

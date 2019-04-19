@@ -47,7 +47,7 @@ public class UserController {
 
     @PostMapping("/assignRoles")
     @ApiOperation("给用户分配角色,两个参数,用户的id userId , 角色的id集合 roleIds")
-    public Result assignRoles(Map<String, Object> dataMap) {
+    public Result assignRoles(@RequestBody Map<String, Object> dataMap) {
         return userService.assignRoles(dataMap);
     }
 }

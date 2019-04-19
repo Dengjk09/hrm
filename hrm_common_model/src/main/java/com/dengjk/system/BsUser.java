@@ -1,7 +1,12 @@
 package com.dengjk.system;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
@@ -22,9 +27,10 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "BS_USER")
-@Data
 @DynamicUpdate(value = true)
 @DynamicInsert(value = true)
+@Getter
+@Setter
 public class BsUser implements java.io.Serializable {
     /**
      * 版本号
@@ -152,6 +158,7 @@ public class BsUser implements java.io.Serializable {
      */
     @ManyToMany
     /**解决json转换之间的死循环*/
+    @JsonIgnoreProperties(value = { "users" })
     /**描述中间表之间的关系*/
     @JoinTable(
         name = "bs_user_role", joinColumns = {@JoinColumn(name = "user_id",referencedColumnName = "id")},

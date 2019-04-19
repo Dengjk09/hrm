@@ -1,5 +1,6 @@
 package com.dengjk.system;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.hibernate.annotations.DynamicInsert;
@@ -33,7 +34,7 @@ public class BsRole implements java.io.Serializable {
     @Column(name = "ID", unique = true, nullable = false, length = 19)
     @GeneratedValue(generator = "role")
     @GenericGenerator(name = "role", strategy = "com.dengjk.common.utils.IdGenerator",
-            parameters = {@org.hibernate.annotations.Parameter(name = "dataCenterID", value = "20") ,
+            parameters = {@org.hibernate.annotations.Parameter(name = "dataCenterID", value = "20"),
                     @org.hibernate.annotations.Parameter(name = "workerId", value = "10")})
     private String id;
 
@@ -61,7 +62,6 @@ public class BsRole implements java.io.Serializable {
      */
 
     @ManyToMany(mappedBy = "roles")
-    @JsonIgnore
     private Set<BsUser> users;
 
 
@@ -72,12 +72,12 @@ public class BsRole implements java.io.Serializable {
     @ManyToMany
     /**解决json转换之间的死循环*/
     @JsonIgnore
+    @JsonBackReference
     /**描述中间表之间的关系*/
     @JoinTable(
             name = "bs_role_permission", joinColumns = {@JoinColumn(name = "role_id", referencedColumnName = "id")},
             inverseJoinColumns = {@JoinColumn(name = "permission_id", referencedColumnName = "id")}
     )
-    private Set<BsPermission> roles;
-
+    private Set<BsPermission> permissions;
 
 }

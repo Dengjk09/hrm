@@ -32,7 +32,7 @@ department_name VARCHAR ( 225 ) DEFAULT NULL COMMENT '部门名称'
 
 CREATE TABLE bs_role (
 id BIGINT ( 20 ) PRIMARY KEY COMMENT '主键',
-NAME VARCHAR ( 255 ) NOT NULL COMMENT '手机号码',
+name VARCHAR ( 255 ) NOT NULL COMMENT '角色名称',
 descrition VARCHAR ( 255 ) NOT NULL COMMENT '角色描述',
 company_id BIGINT ( 20 ) DEFAULT NULL COMMENT '企业id'
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 comment '角色表';
@@ -42,11 +42,11 @@ company_id BIGINT ( 20 ) DEFAULT NULL COMMENT '企业id'
 
 CREATE TABLE bs_permission (
 id BIGINT ( 20 ) PRIMARY KEY COMMENT '主键',
-NAME VARCHAR ( 255 ) NOT NULL COMMENT '手机号码',
+name VARCHAR ( 255 ) NOT NULL COMMENT '手机号码',
 type INT ( 1 ) NOT NULL COMMENT '权限类型 1为菜单 2 为功能  3 为api',
-CODE VARCHAR ( 11 ) DEFAULT NULL COMMENT '权限标志',
+code VARCHAR ( 11 ) DEFAULT NULL COMMENT '权限标志',
 descrition VARCHAR ( 255 ) NOT NULL COMMENT '权限描述',
-pid VARCHAR ( 11 ) DEFAULT NULL COMMENT '父级id（权限属于哪个菜单或者按钮）',
+pid VARCHAR ( 20 ) DEFAULT NULL COMMENT '父级id（权限属于哪个菜单或者按钮）',
 en_visible INT ( 1 ) DEFAULT NULL COMMENT '企业可见性 0不可见,1可见'
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COMMENT '权限表';
 
