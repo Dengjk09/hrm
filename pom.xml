@@ -63,6 +63,15 @@
             <scope>test</scope>
         </dependency>
 
+        <!--我们在添加第三方依赖的时候，不需要写版本号，它能够自动帮我们挑选一个最优的版本，保证最大限度的扩展-->
+        <dependency>
+            <groupId>io.spring.platform</groupId>
+            <artifactId>platform-bom</artifactId>
+            <version>Athens-SR2</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+
 
         <dependency>
             <groupId>com.alibaba</groupId>

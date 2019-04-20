@@ -1,5 +1,8 @@
 package com.dengjk.system.service.impl;
 
+import com.dengjk.common.exception.LoginErrorException;
+import com.dengjk.common.utils.BeanMapUitls;
+import com.dengjk.common.utils.JwtUtils;
 import com.dengjk.common.utils.Result;
 import com.dengjk.common.utils.ResultUtil;
 import com.dengjk.system.BsRole;
@@ -7,12 +10,14 @@ import com.dengjk.system.BsUser;
 import com.dengjk.system.dao.RoleRepository;
 import com.dengjk.system.dao.UserRepository;
 import com.dengjk.system.service.UserService;
-import com.sun.org.apache.regexp.internal.RE;
+import io.jsonwebtoken.Claims;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -28,6 +33,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private JwtUtils jwtUtils;
 
     /**
      * 新增用户
@@ -77,5 +85,46 @@ public class UserServiceImpl implements UserService {
         bsUser.setRoles(byIdIn);
         userRepository.save(bsUser);
         return ResultUtil.success("保存成功");
+    }
+
+    /**
+     * 用于请求登入
+     *
+     * @param dataMap
+     * @return
+     */
+    @Override
+    public Result userLogin(Map<String, Object> dataMap) throws LoginErrorException {
+        String mobile = (String) dataMap.get("mobile");
+        String password = (String) dataMap.get("password");
+        BsUser allByMobile = userRepository.findAllByMobile(mobile);
+        if (allByMobile == null) {
+            throw new LoginErrorException("用户不存在,请先注册!!!");
+        }
+        if (!StringUtils.equals(allByMobile.getPassword(), password)) {
+            throw new LoginErrorException("密码有误,请重新登入!!!");
+        }
+        /**生成jwt*/
+        Map<String, Object> userMap = BeanMapUitls.beanToMap(allByMobile);
+        String jwt = jwtUtils.createJwt(allByMobile.getId(), allByMobile.getUserName(), null);
+        return ResultUtil.success(jwt);
+    }
+
+
+    /**
+     * 通过jwt-token获取用户信息
+     *
+     * @param token
+     * @return
+     */
+    @Override
+    public Result userInfo(String token) throws LoginErrorException {
+        token = StringUtils.remove(token, "Bearer ");
+        Claims claims = jwtUtils.parseJwt(token);
+        Optional<BsUser> byId = userRepository.findById(claims.getId());
+        if (byId.isPresent()) {
+            return ResultUtil.success(byId.get());
+        }
+        return ResultUtil.notExist("或者失败");
     }
 }

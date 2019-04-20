@@ -1,5 +1,6 @@
 package com.dengjk.system.service;
 
+import com.dengjk.common.exception.LoginErrorException;
 import com.dengjk.common.utils.Result;
 import com.dengjk.system.BsUser;
 
@@ -25,4 +26,8 @@ public interface UserService {
     Result deleteUserById(String id);
 
     Result assignRoles(Map<String, Object> dataMap);
+
+    Result userLogin(Map<String, Object> dataMap) throws LoginErrorException;
+
+    Result userInfo(String authorization) throws LoginErrorException;
 }

@@ -2,12 +2,10 @@ package com.dengjk.common.exception;
 
 import com.dengjk.common.utils.Result;
 import com.dengjk.common.utils.ResultUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -22,9 +20,8 @@ import java.util.stream.Collectors;
  * @ModelAttribute 绑定模型数据  在controller可以通过该注解获取@ModelAttribute
  **/
 @RestControllerAdvice
+@Slf4j
 public class ControllerException {
-
-    private Logger logger = LoggerFactory.getLogger(ControllerAdvice.class);
 
 
     @ExceptionHandler({BindException.class, MethodArgumentNotValidException.class})
@@ -40,7 +37,7 @@ public class ControllerException {
                     .stream().map(error -> error.getField() + ":" + error.getDefaultMessage())
                     .collect(Collectors.joining(","));
         }
-        logger.warn(errMsg.toString());
+        log.warn(errMsg.toString());
         return ResultUtil.authFail(errMsg);
     }
 
@@ -48,11 +45,22 @@ public class ControllerException {
     @ResponseStatus(HttpStatus.OK)
     public Result defaultErrorHandler(Exception e) {
         if (e instanceof IllegalArgumentException) {
-            logger.error("请求失败:", e);
+            log.error("请求失败:", e);
             return ResultUtil.fail(e.getMessage());
         } else {
-            logger.error("请求失败:", e);
+            log.error("请求失败:", e);
             return ResultUtil.severError(e.getMessage());
         }
+    }
+
+    /***
+     * 权限相关处理
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(value = {LoginErrorException.class})
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public Result loginErrorHandler(Exception e) {
+        return ResultUtil.authFail(e.getMessage());
     }
 }

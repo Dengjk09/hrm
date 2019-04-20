@@ -10,4 +10,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
  * @desc
  **/
 public interface UserRepository extends JpaRepository<BsUser, String>, JpaSpecificationExecutor<BsUser> {
+
+    BsUser findAllByMobile(String mobile);
 }

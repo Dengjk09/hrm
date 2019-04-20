@@ -3,6 +3,10 @@ server:
 spring:
   profiles:
     active: db
+jwt:
+  config:
+    signKey: dengjk-hrm
+    ttl: 3600000
 
 
 
