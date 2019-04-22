@@ -14,7 +14,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EnableJpaRepositories(basePackages = {"com.dengjk.system.dao"})
 @EnableCaching
 public class HrmSystemApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(HrmSystemApplication.class, args);
     }
