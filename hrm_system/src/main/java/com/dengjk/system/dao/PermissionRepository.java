@@ -21,4 +21,7 @@ public interface PermissionRepository extends JpaRepository<BsPermission, String
     Set<BsPermission> findAllByPidInAndType(List<String> ids ,Integer type);
 
 
+    BsPermission findByPid(String pid);
+
+
 }

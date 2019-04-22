@@ -115,6 +115,26 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
 
+    /**
+     * 根据类型查询权限集合
+     *
+     * @param type
+     * @param id
+     */
+    @Override
+    public Object findPermissionDel(Integer type, String id) {
+        switch (type) {
+            case 1:
+                return permissionMenuRepository.findById(id).get();
+            case 2:
+                return permissionPointRepository.findById(id).get();
+            case 3:
+                return permissionApiRepository.findById(id).get();
+        }
+        throw new MyException("未找到对应的类型");
+    }
+
+
     @Override
     public Result deletePermissionById(String id) {
         return null;

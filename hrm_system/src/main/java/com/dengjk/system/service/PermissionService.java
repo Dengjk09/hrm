@@ -1,7 +1,6 @@
 package com.dengjk.system.service;
 
 import com.dengjk.common.utils.Result;
-import com.dengjk.system.BsPermission;
 import com.dengjk.system.vo.PermissionAddVo;
 
 /**
@@ -17,4 +16,6 @@ public interface PermissionService {
     Result deletePermissionById(String id);
 
     Result upatePermission(PermissionAddVo permissionAddVo);
+
+    Object findPermissionDel(Integer type, String id);
 }

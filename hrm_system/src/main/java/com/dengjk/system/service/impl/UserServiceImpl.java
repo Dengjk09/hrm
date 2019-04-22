@@ -1,24 +1,25 @@
 package com.dengjk.system.service.impl;
 
 import com.dengjk.common.exception.LoginErrorException;
-import com.dengjk.common.utils.BeanMapUitls;
 import com.dengjk.common.utils.JwtUtils;
 import com.dengjk.common.utils.Result;
 import com.dengjk.common.utils.ResultUtil;
+import com.dengjk.system.BsPermission;
 import com.dengjk.system.BsRole;
 import com.dengjk.system.BsUser;
+import com.dengjk.system.dao.PermissionRepository;
 import com.dengjk.system.dao.RoleRepository;
 import com.dengjk.system.dao.UserRepository;
+import com.dengjk.system.service.PermissionService;
 import com.dengjk.system.service.UserService;
+import com.google.common.collect.Sets;
 import io.jsonwebtoken.Claims;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Dengjk
@@ -36,6 +37,14 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private JwtUtils jwtUtils;
+
+
+    @Autowired
+    private PermissionRepository permissionRepository;
+
+
+    @Autowired
+    private PermissionService permissionService;
 
     /**
      * 新增用户
@@ -105,8 +114,9 @@ public class UserServiceImpl implements UserService {
             throw new LoginErrorException("密码有误,请重新登入!!!");
         }
         /**生成jwt*/
-        Map<String, Object> userMap = BeanMapUitls.beanToMap(allByMobile);
-        String jwt = jwtUtils.createJwt(allByMobile.getId(), allByMobile.getUserName(), null);
+        Map<String, Object> userMap = new HashMap<>();
+        userMap.put("companyId", allByMobile.getCompanyId());
+        String jwt = jwtUtils.createJwt(allByMobile.getId(), allByMobile.getUserName(), userMap);
         return ResultUtil.success(jwt);
     }
 
@@ -123,8 +133,33 @@ public class UserServiceImpl implements UserService {
         Claims claims = jwtUtils.parseJwt(token);
         Optional<BsUser> byId = userRepository.findById(claims.getId());
         if (byId.isPresent()) {
+            /**渲染权限明细*/
+            Set<BsRole> roles = byId.get().getRoles();
+            roles.forEach(x -> {
+                Set<BsPermission> permissions = x.getPermissions();
+                permissions.forEach(y -> {
+                    String pid = y.getPid();
+                    if(StringUtils.isNotEmpty(pid)){
+                        /**要去寻找他们的上一级*/
+                        BsPermission allByPid = permissionRepository.findByPid(pid);
+                        allByPid.setNextBsPermission(Sets.newHashSet(y));
+                        if(StringUtils.isNotEmpty(allByPid.getPid())){
+                            BsPermission allByPid2 = permissionRepository.findByPid(pid);
+                            allByPid2.setNextBsPermission(Sets.newHashSet(allByPid));
+                            BeanUtils.copyProperties(y,allByPid2);
+                        }
+                    }
+                    y.setPermissionDel(permissionService.findPermissionDel(y.getType(), y.getId()));
+                });
+            });
             return ResultUtil.success(byId.get());
         }
         return ResultUtil.notExist("或者失败");
     }
+
+
+
+
+
+
 }

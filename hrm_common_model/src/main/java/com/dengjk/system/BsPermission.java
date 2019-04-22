@@ -1,13 +1,14 @@
 package com.dengjk.system;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.Set;
 
 /**
  * 权限表(BS_PERMISSION)
@@ -17,9 +18,10 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "BS_PERMISSION")
-@Data
 @DynamicUpdate(value = true)
 @DynamicInsert(value = true)
+@Getter
+@Setter
 public class BsPermission implements java.io.Serializable {
     /**
      * 版本号
@@ -67,8 +69,21 @@ public class BsPermission implements java.io.Serializable {
     @Column(name = "PID", nullable = true, length = 11)
     private String pid;
 
-    /**是否企业可见*/
+    /**
+     * 是否企业可见
+     */
     @Column(name = "en_visible")
     private Integer enVisible;
+
+    /**
+     * 用于渲染查询的权限明细
+     */
+    @Transient
+    private Object permissionDel;
+
+    @Transient
+    @JsonBackReference
+    private Set<BsPermission> nextBsPermission;
+
 
 }
