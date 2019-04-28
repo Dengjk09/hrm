@@ -16,7 +16,6 @@ import java.util.Map;
  * @desc 操作用户控制层
  * CrossOrigin解决跨域问题
  **/
-@CrossOrigin
 @RestController
 @RequestMapping("/sys/role")
 @Api(value = "操作角色", description = "操作角色")

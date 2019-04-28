@@ -3,6 +3,7 @@ package com.dengjk.common.exception;
 import com.dengjk.common.utils.Result;
 import com.dengjk.common.utils.ResultUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.authz.AuthorizationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -62,5 +63,17 @@ public class ControllerException {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public Result loginErrorHandler(Exception e) {
         return ResultUtil.authFail(e.getMessage());
+    }
+
+
+    /**
+     * 处理shiro注解配置权限,而权限不足抛出的异常
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(value = {AuthorizationException.class})
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public Result authorizationHandler(Exception e) {
+        return ResultUtil.authFail("抱歉,没有权限,请联系管理员");
     }
 }

@@ -49,6 +49,10 @@ public class JwtInterceptor extends HandlerInterceptorAdapter {
                 return true;
             }
         }
-        return false;
+  /*      response.setContentType("application/json;charset=utf-8");
+        response.setStatus(401);
+        PrintWriter writer = response.getWriter();
+        writer.write(String.valueOf(JSON.toJSONString(ResultUtil.authFail("授权失败,重定向到登录页面"))));*/
+        return true;
     }
 }

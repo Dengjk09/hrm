@@ -10,6 +10,7 @@ import lombok.Setter;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Proxy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -156,7 +157,7 @@ public class BsUser implements java.io.Serializable {
     /**
      * 用户和角色之间的多对多关系
      */
-    @ManyToMany
+    @ManyToMany()
     /**解决json转换之间的死循环*/
     @JsonIgnoreProperties(value = { "users" })
     /**描述中间表之间的关系*/

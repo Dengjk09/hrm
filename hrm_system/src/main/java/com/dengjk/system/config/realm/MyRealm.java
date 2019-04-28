@@ -1,7 +1,5 @@
 package com.dengjk.system.config.realm;
 
-import com.dengjk.common.exception.LoginErrorException;
-import com.dengjk.system.BsPermission;
 import com.dengjk.system.BsUser;
 import com.dengjk.system.dao.UserRepository;
 import org.apache.commons.lang3.StringUtils;

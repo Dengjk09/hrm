@@ -19,7 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.crypto.hash.Md5Hash;
 import org.apache.shiro.subject.Subject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -167,8 +166,9 @@ public class UserServiceImpl implements UserService {
 
     /**
      * 使用shiro模拟用户登入
-     *
+     * <p>
      * 登入的用户名和明细会委托给securityManager 我们再去使用,reale域进行用户的认证和授权->MyRealm
+     *
      * @param mobile
      * @param password
      * @return
@@ -177,7 +177,7 @@ public class UserServiceImpl implements UserService {
     public Result loginByShiro(String mobile, String password) throws LoginErrorException {
         try {
             /**对用于的密码进行加密-md5加盐*/
-            password = new Md5Hash(password, mobile, 3).toString();
+            // password = new Md5Hash(password, mobile, 3).toString();
             /**获取UsernamePasswordToken对象*/
             UsernamePasswordToken userToken = new UsernamePasswordToken(mobile, password);
             /**获取Subject对象*/

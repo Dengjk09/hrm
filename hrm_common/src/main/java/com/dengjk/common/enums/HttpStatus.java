@@ -9,7 +9,7 @@ public enum HttpStatus {
 
     SUCCESS(200,"成功"),
     FAIL(400,"失败"),
-    AUTH_FAIL(403, "校验错误"),
+    AUTH_FAIL(401, "校验错误"),
     NOT_EXIST(404, "不存在"),
     SEVER_ERROR(500, "服务错误"),
     VERIFIY_FAIL(402, "商品校验错误");

@@ -1,12 +1,12 @@
 package com.dengjk.system.config;
 
 import com.dengjk.system.config.realm.MyRealm;
-import org.apache.shiro.mgt.DefaultSecurityManager;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.realm.Realm;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
+import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -17,6 +17,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Dengjk
  * @create 2019-04-28 16:00
  * @desc springboot整合shiro配置
+ * <p>
+ * 配置权限鉴定的两种方式：
+ * 1.过滤器拦截ShiroFilterFactoryBean
+ * 2.使用注解来配置  权限：1.@ RequiresPermissions("sys_user_delete") 角色：2.@RequiresRoles("管理员")
  * <p>
  * 往容器中注入四个bean
  * 1.创建自定义的realm
@@ -46,8 +50,8 @@ public class ShiroConfig {
      * @return
      */
     @Bean
-    public SecurityManager getSecurityManager(@Autowired Realm realm) {
-        DefaultSecurityManager securityManager = new DefaultSecurityManager();
+    public SecurityManager getSecurityManager(Realm realm) {
+        DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
         securityManager.setRealm(realm);
         return securityManager;
     }
@@ -73,20 +77,25 @@ public class ShiroConfig {
      * @return
      */
     @Bean
-    public ShiroFilterFactoryBean filterFactoryBean(@Autowired SecurityManager securityManager) {
+    public ShiroFilterFactoryBean filterFactoryBean(SecurityManager securityManager) {
         /**创建shiro过滤器工厂*/
         ShiroFilterFactoryBean factoryBean = new ShiroFilterFactoryBean();
         /**设置安全管理器*/
         factoryBean.setSecurityManager(securityManager);
         /**设置跳转页面(登入的页面和失败的页面,登入成功之后的页面)*/
-        factoryBean.setLoginUrl("/loginError/1");
-        factoryBean.setUnauthorizedUrl("/loginError/2");
-        factoryBean.setSuccessUrl("");
+        factoryBean.setLoginUrl("/loginError?code=1");
+        factoryBean.setUnauthorizedUrl("/loginError?code=2");
         /**设置过滤器集合*/
         Map<String, String> permisMap = new ConcurrentHashMap<>();
         /**放开权限,所有都可以访问*/
         permisMap.put("/sys/user/index", "anon");
+        permisMap.put("/sys/user/loginByShiro", "anon");
         permisMap.put("/sys/user/**", "authc");
+        /**
+         * permisMap.put("/sys/user/**", "roles[管理员]");
+         * permisMap.put("/sys/user/**", "perms[sys_user_delete]");
+         *
+         */
         /**map的k是要过滤的地址,map的v是要过滤的类型*/
         factoryBean.setFilterChainDefinitionMap(permisMap);
         return factoryBean;
@@ -95,14 +104,26 @@ public class ShiroConfig {
 
     /**
      * 开启shiro对注解的支持
-     *
-     * @param securityManager
-     * @return
+     * <p>
+     * ==========使用注解如果权限不匹配,不会跳转到UnauthorizedUrl,而是直接抛异常,我们使用全局异常处理,响应结果 authorizationHandler
+     * <p>
+     * 两个注解,加在controller方法上,表示该接口必须要有该权限
+     * <p>
+     * 1.@ RequiresPermissions("sys_user_delete")
+     * 2.@RequiresRoles("管理员")
      */
     @Bean
-    public AuthorizationAttributeSourceAdvisor attributeSourceAdvisor(@Autowired SecurityManager securityManager) {
+    public AuthorizationAttributeSourceAdvisor attributeSourceAdvisor(SecurityManager securityManager) {
         AuthorizationAttributeSourceAdvisor advisor = new AuthorizationAttributeSourceAdvisor();
         advisor.setSecurityManager(securityManager);
         return advisor;
+    }
+
+
+    @Bean
+    public DefaultAdvisorAutoProxyCreator getDefaultAdvisorAutoProxyCreator() {
+        DefaultAdvisorAutoProxyCreator defaultAdvisorAutoProxyCreator = new DefaultAdvisorAutoProxyCreator();
+        defaultAdvisorAutoProxyCreator.setUsePrefix(true);
+        return defaultAdvisorAutoProxyCreator;
     }
 }
