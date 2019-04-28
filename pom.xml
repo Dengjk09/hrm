@@ -35,6 +35,7 @@
         <druid-version>1.1.16</druid-version>
         <commons-version>3.8.1</commons-version>
         <jjwt-version>0.9.1</jjwt-version>
+        <shiro-version>1.4.0</shiro-version>
     </properties>
 
     <dependencies>
