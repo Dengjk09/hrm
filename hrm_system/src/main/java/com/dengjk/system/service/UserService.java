@@ -30,4 +30,6 @@ public interface UserService {
     Result userLogin(Map<String, Object> dataMap) throws LoginErrorException;
 
     Result userInfo(String authorization) throws LoginErrorException;
+
+    Result loginByShiro(String mobile, String password) throws LoginErrorException;
 }

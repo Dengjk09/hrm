@@ -14,7 +14,13 @@ import com.dengjk.system.service.PermissionService;
 import com.dengjk.system.service.UserService;
 import com.google.common.collect.Sets;
 import io.jsonwebtoken.Claims;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.crypto.hash.Md5Hash;
+import org.apache.shiro.subject.Subject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +33,7 @@ import java.util.*;
  * @desc
  **/
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     @Autowired
@@ -139,14 +146,14 @@ public class UserServiceImpl implements UserService {
                 Set<BsPermission> permissions = x.getPermissions();
                 permissions.forEach(y -> {
                     String pid = y.getPid();
-                    if(StringUtils.isNotEmpty(pid)){
+                    if (StringUtils.isNotEmpty(pid)) {
                         /**要去寻找他们的上一级*/
                         BsPermission allByPid = permissionRepository.findByPid(pid);
                         allByPid.setNextBsPermission(Sets.newHashSet(y));
-                        if(StringUtils.isNotEmpty(allByPid.getPid())){
+                        if (StringUtils.isNotEmpty(allByPid.getPid())) {
                             BsPermission allByPid2 = permissionRepository.findByPid(pid);
                             allByPid2.setNextBsPermission(Sets.newHashSet(allByPid));
-                            BeanUtils.copyProperties(y,allByPid2);
+                            BeanUtils.copyProperties(y, allByPid2);
                         }
                     }
                     y.setPermissionDel(permissionService.findPermissionDel(y.getType(), y.getId()));
@@ -158,8 +165,30 @@ public class UserServiceImpl implements UserService {
     }
 
 
-
-
-
-
+    /**
+     * 使用shiro模拟用户登入
+     *
+     * 登入的用户名和明细会委托给securityManager 我们再去使用,reale域进行用户的认证和授权->MyRealm
+     * @param mobile
+     * @param password
+     * @return
+     */
+    @Override
+    public Result loginByShiro(String mobile, String password) throws LoginErrorException {
+        try {
+            /**对用于的密码进行加密-md5加盐*/
+            password = new Md5Hash(password, mobile, 3).toString();
+            /**获取UsernamePasswordToken对象*/
+            UsernamePasswordToken userToken = new UsernamePasswordToken(mobile, password);
+            /**获取Subject对象*/
+            Subject subject = SecurityUtils.getSubject();
+            String sessionId = (String) subject.getSession().getId();
+            log.info("sessionId:" + sessionId);
+            /**使用subject进行登入*/
+            subject.login(userToken);
+            return ResultUtil.success("登入成功");
+        } catch (AuthenticationException e) {
+            throw new LoginErrorException("登入失败,请检查用户名和秘密");
+        }
+    }
 }
