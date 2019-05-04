@@ -1,17 +1,40 @@
 package com.dengjk.system.config;
 
+import com.dengjk.common.enums.PermAuthTypeEnum;
+import com.dengjk.common.enums.PermissionTypeEnum;
+import com.dengjk.system.BsPermission;
+import com.dengjk.system.PePermissionApi;
 import com.dengjk.system.config.realm.MyRealm;
+import com.dengjk.system.dao.PermissionApiRepository;
+import com.dengjk.system.dao.PermissionRepository;
+import com.dengjk.system.service.impl.MySessionManager;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.codec.Base64;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.realm.Realm;
+import org.apache.shiro.session.mgt.SessionManager;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
+import org.apache.shiro.web.mgt.CookieRememberMeManager;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
+import org.apache.shiro.web.servlet.Cookie;
+import org.apache.shiro.web.servlet.SimpleCookie;
+import org.crazycake.shiro.RedisCacheManager;
+import org.crazycake.shiro.RedisManager;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * @author Dengjk
@@ -29,8 +52,31 @@ import java.util.concurrent.ConcurrentHashMap;
  * 4.开启shiro对注解支持
  **/
 @Configuration
+@Slf4j
+@EnableCaching
 public class ShiroConfig {
 
+
+    @Value("${spring.redis.host}")
+    private String redistHost;
+
+    @Value("${spring.redis.database}")
+    private String dataBase;
+
+    @Value("${spring.redis.password}")
+    private String password;
+
+    @Value("${spring.redis.port}")
+    private String port;
+
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
+
+    @Autowired
+    private PermissionRepository permissionRepository;
+
+    @Autowired
+    private PermissionApiRepository permissionApiRepository;
 
     /**
      * 往容器中注入自定义的realm域
@@ -53,6 +99,10 @@ public class ShiroConfig {
     public SecurityManager getSecurityManager(Realm realm) {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
         securityManager.setRealm(realm);
+        /**
+         * 设置redis-session缓存
+         */
+        securityManager.setSessionManager(sessionManager());
         return securityManager;
     }
 
@@ -82,21 +132,25 @@ public class ShiroConfig {
         ShiroFilterFactoryBean factoryBean = new ShiroFilterFactoryBean();
         /**设置安全管理器*/
         factoryBean.setSecurityManager(securityManager);
+        /**设置过滤器集合*/
+        Map<String, String> permisMap = new ConcurrentHashMap<>();
         /**设置跳转页面(登入的页面和失败的页面,登入成功之后的页面)*/
         factoryBean.setLoginUrl("/loginError?code=1");
         factoryBean.setUnauthorizedUrl("/loginError?code=2");
-        /**设置过滤器集合*/
-        Map<String, String> permisMap = new ConcurrentHashMap<>();
         /**放开权限,所有都可以访问*/
+        /**map的k是要过滤的地址,map的v是要过滤的类型*/
         permisMap.put("/sys/user/index", "anon");
+        permisMap.put("sys/user/login", "anon");
+        permisMap.put("/loginError", "anon");
         permisMap.put("/sys/user/loginByShiro", "anon");
-        permisMap.put("/sys/user/**", "authc");
         /**
          * permisMap.put("/sys/user/**", "roles[管理员]");
          * permisMap.put("/sys/user/**", "perms[sys_user_delete]");
-         *
          */
-        /**map的k是要过滤的地址,map的v是要过滤的类型*/
+        /**加载数据库配置动态的设置权限*/
+        this.dynamicPermis(permisMap);
+        /**拦截所有放在最后*/
+        permisMap.put("/**", "authc");
         factoryBean.setFilterChainDefinitionMap(permisMap);
         return factoryBean;
     }
@@ -125,5 +179,127 @@ public class ShiroConfig {
         DefaultAdvisorAutoProxyCreator defaultAdvisorAutoProxyCreator = new DefaultAdvisorAutoProxyCreator();
         defaultAdvisorAutoProxyCreator.setUsePrefix(true);
         return defaultAdvisorAutoProxyCreator;
+    }
+
+
+    /**
+     * 配置shiro redisManager
+     *
+     * @return
+     */
+    public RedisManager redisManager() {
+        RedisManager redisManager = new RedisManager();
+        redisManager.setHost(redistHost);
+        redisManager.setDatabase(15);
+        redisManager.setPort(Integer.parseInt(port));
+        redisManager.setPassword(password);
+        return redisManager;
+    }
+
+    /**
+     * cacheManager 缓存 redis实现
+     *
+     * @return
+     */
+    public RedisCacheManager redisCacheManager() {
+        log.info("创建RedisCacheManager...");
+        RedisCacheManager redisCacheManager = new RedisCacheManager();
+        redisCacheManager.setRedisManager(redisManager());
+        return redisCacheManager;
+    }
+
+    /**
+     * RedisSessionDAO shiro sessionDao层的实现 通过redis
+     *
+     * @return
+     */
+    @Bean
+    public ShiroRedisSessionDao redisSessionDAO() {
+        /*RedisSessionDAO redisSessionDAO = new RedisSessionDAO();
+        redisSessionDAO.setRedisManager(redisManager());*/
+        /**自己实现sessionDao,使用redisTemplate存储数据,value的序列化必须是jdk的字节实现 redisTemplate.setValueSerializer(new JdkSerializationRedisSerializer());*/
+        ShiroRedisSessionDao redisSessionDao = new ShiroRedisSessionDao(redisTemplate);
+        return redisSessionDao;
+    }
+
+
+    /**
+     * cookie管理对象;记住我功能
+     *
+     * @return
+     */
+    @Bean
+    public CookieRememberMeManager rememberMeManager() {
+        CookieRememberMeManager cookieRememberMeManager = new CookieRememberMeManager();
+        //cookieRememberMeManager.setCookie(remeberMeCookie());
+        /**rememberMe cookie加密的密钥 建议每个项目都不一样 默认AES算法 密钥长度(128 256 512 位)*/
+        cookieRememberMeManager.setCipherKey(Base64.decode("2AvVhdsgUs0FSA3SDFAdag=="));
+        return cookieRememberMeManager;
+    }
+
+
+    /***
+     * session管理器
+     * @return
+     */
+    @Bean
+    public SessionManager sessionManager() {
+        MySessionManager sessionManager = new MySessionManager();
+        sessionManager.setSessionDAO(redisSessionDAO());
+        /**设置session超时时间-单位毫秒*/
+        int ttl = 1000 * 60 * 60 * 24;
+        sessionManager.setGlobalSessionTimeout(ttl);
+        /**隔多久检查一次session的有效期*/
+        sessionManager.setSessionValidationInterval(ttl);
+        sessionManager.setDeleteInvalidSessions(true);
+        /**删除过期的session*/
+        sessionManager.setSessionIdCookieEnabled(true);
+        sessionManager.setCacheManager(redisCacheManager());
+        sessionManager.setSessionIdCookie(sessionIdCookie());
+        return sessionManager;
+    }
+
+
+    /**
+     * 设置cookie
+     *
+     * @return
+     */
+    public Cookie sessionIdCookie() {
+        Cookie sessionIdCookie = new SimpleCookie("hrm");
+        sessionIdCookie.setMaxAge(86400);
+        sessionIdCookie.setHttpOnly(true);
+        sessionIdCookie.setPath("/");
+        sessionIdCookie.setName("hrm");
+        return sessionIdCookie;
+    }
+
+
+    public SimpleCookie remeberMeCookie() {
+        SimpleCookie scookie = new SimpleCookie("rememberMe");
+        scookie.setMaxAge(86400 * 30);
+        scookie.setHttpOnly(true);
+        scookie.setPath("/");
+        return scookie;
+    }
+
+    /***
+     * 动态查询数据库,添加权限
+     * @param permisMap
+     */
+    private void dynamicPermis(Map<String, String> permisMap) {
+        Set<BsPermission> permissions = permissionRepository.findByType(PermissionTypeEnum.api.getCode());
+        Set<String> apiId = permissions.stream().map(x -> x.getId()).collect(Collectors.toSet());
+        List<PePermissionApi> permissionApis = permissionApiRepository.findAllById(apiId);
+        permissionApis.stream().filter(x -> StringUtils.isNotEmpty(x.getApiUrl())).forEach(x -> {
+            String permType = PermAuthTypeEnum.getPermAuthTypeEnum(x.getApiAuthType()).getName();
+            if (x.getApiAuthType() == 3 || x.getApiAuthType() == 4) {
+                /**如果是设置权限或者角色,就要特殊处理*/
+                BsPermission bsPermission = permissions.stream().filter(y -> StringUtils.equals(y.getId(), x.getId())).findFirst().orElse(null);
+                permisMap.put(x.getApiUrl(), String.format(permType, bsPermission.getCode()));
+            } else {
+                permisMap.put(x.getApiUrl(), permType);
+            }
+        });
     }
 }

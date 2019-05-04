@@ -1,16 +1,14 @@
 package com.dengjk.system;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.alibaba.fastjson.annotation.JSONField;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Proxy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -36,7 +34,7 @@ public class BsUser implements java.io.Serializable {
     /**
      * 版本号
      */
-    private static final long serialVersionUID = -8523632798814446393L;
+    private static final long serialVersionUID = 1L;
 
     /**
      * 主键
@@ -45,7 +43,7 @@ public class BsUser implements java.io.Serializable {
     @Column(name = "ID", unique = true, nullable = false, length = 19)
     @GeneratedValue(generator = "user")
     @GenericGenerator(name = "user", strategy = "com.dengjk.common.utils.IdGenerator",
-            parameters = {@org.hibernate.annotations.Parameter(name = "dataCenterID", value = "20") ,
+            parameters = {@org.hibernate.annotations.Parameter(name = "dataCenterID", value = "20"),
                     @org.hibernate.annotations.Parameter(name = "workerId", value = "10")})
     private String id;
 
@@ -76,7 +74,7 @@ public class BsUser implements java.io.Serializable {
      */
     @Column(name = "CREATE_TIME", nullable = true)
     @CreatedDate
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime createTime;
 
     /**
@@ -90,7 +88,7 @@ public class BsUser implements java.io.Serializable {
      */
     @Column(name = "TIME_OF_ENTRY", nullable = true)
     @LastModifiedDate
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime timeOfEntry;
 
     /**
@@ -127,7 +125,7 @@ public class BsUser implements java.io.Serializable {
      * 转正时间
      */
     @Column(name = "CORRECTION_TIME", nullable = true)
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime correctionTime;
 
     /**
@@ -157,13 +155,13 @@ public class BsUser implements java.io.Serializable {
     /**
      * 用户和角色之间的多对多关系
      */
-    @ManyToMany()
+    @ManyToMany(fetch=FetchType.EAGER)
     /**解决json转换之间的死循环*/
-    @JsonIgnoreProperties(value = { "users" })
+    @JsonIgnoreProperties(value = {"users"})
     /**描述中间表之间的关系*/
     @JoinTable(
-        name = "bs_user_role", joinColumns = {@JoinColumn(name = "user_id",referencedColumnName = "id")},
-            inverseJoinColumns = {@JoinColumn(name = "role_id",referencedColumnName = "id")}
+            name = "bs_user_role", joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id")},
+            inverseJoinColumns = {@JoinColumn(name = "role_id", referencedColumnName = "id")}
     )
     private Set<BsRole> roles;
 

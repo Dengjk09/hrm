@@ -48,4 +48,10 @@ public class PermissionController {
     public Result deletePermissionById(@PathVariable(value = "id")String id){
         return permissionService.deletePermissionById(id);
     }
+
+    @GetMapping("/findPermisMenuTree")
+    @ApiOperation("获取权限树状结构")
+    public Result findPermisMenuTree(){
+        return permissionService.findPermisMenuTree();
+    }
 }

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * @author Dengjk
@@ -16,12 +17,20 @@ public interface PermissionRepository extends JpaRepository<BsPermission, String
 
     Set<BsPermission> findByIdIn(List<String> ids);
 
+    /**
+     * 根据类型和id查询所有的权限
+     */
+    Set<BsPermission> findAllByPidInAndType(List<String> ids, Integer type);
 
-    /**根据类型和id查询所有的权限*/
-    Set<BsPermission> findAllByPidInAndType(List<String> ids ,Integer type);
+    /**
+     * 通过父id查询
+     */
+    Set<BsPermission> findByPid(String pid);
 
-
-    BsPermission findByPid(String pid);
+    /**
+     * 通过权限类型查询
+     */
+    Set<BsPermission> findByType(Integer type);
 
 
 }

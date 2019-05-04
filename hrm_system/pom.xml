@@ -42,6 +42,10 @@
             <artifactId>druid-spring-boot-starter</artifactId>
             <version>${druid-version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
 
 
         <!--swagger-->
@@ -75,7 +79,13 @@
             <artifactId>shiro-core</artifactId>
             <version>${shiro-version}</version>
         </dependency>
-        
+        <dependency>
+            <groupId>org.crazycake</groupId>
+            <artifactId>shiro-redis</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+
+
     </dependencies>
 
 </project>

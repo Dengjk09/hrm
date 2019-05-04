@@ -39,6 +39,12 @@ public class PePermissionApi implements java.io.Serializable {
     @Column(name = "API_URL", nullable = false, length = 500)
     private String apiUrl;
 
+    /**
+     * 权限类型是否需要认证
+     */
+    @Column(name = "api_auth_type")
+    private Integer apiAuthType;
+
     /** 请求类型 */
     @Column(name = "API_METHOD", nullable = false, length = 255)
     private String apiMethod;

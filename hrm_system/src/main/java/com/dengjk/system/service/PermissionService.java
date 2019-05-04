@@ -18,4 +18,6 @@ public interface PermissionService {
     Result upatePermission(PermissionAddVo permissionAddVo);
 
     Object findPermissionDel(Integer type, String id);
+
+    Result findPermisMenuTree();
 }

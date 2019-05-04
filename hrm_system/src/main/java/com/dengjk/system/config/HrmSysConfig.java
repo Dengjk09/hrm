@@ -58,9 +58,9 @@ public class HrmSysConfig extends WebMvcConfigurationSupport {
     @Override
     protected void addInterceptors(InterceptorRegistry registry) {
         /**拦截所有  放开 /sys/user/login*/
-        registry.addInterceptor(jwtInterceptor).addPathPatterns("/**")
+     /*   registry.addInterceptor(jwtInterceptor).addPathPatterns("/**")
                 .excludePathPatterns("/swagger-resources/**", "/webjars/**", "/v2/**", "/swagger-ui.html/**")
-                .excludePathPatterns("/sys/user/login");
+                .excludePathPatterns("/sys/user/login");*/
         super.addInterceptors(registry);
     }
 

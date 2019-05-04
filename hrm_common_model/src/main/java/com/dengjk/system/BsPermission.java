@@ -75,6 +75,20 @@ public class BsPermission implements java.io.Serializable {
     @Column(name = "en_visible")
     private Integer enVisible;
 
+
+    /**
+     * 标识菜单的层级深度
+     */
+    @Column(name = "depth")
+    private Integer depth;
+
+
+    /**
+     * 菜单的排序
+     */
+    @Column(name = "sort")
+    private Integer sort;
+
     /**
      * 用于渲染查询的权限明细
      */
@@ -82,7 +96,6 @@ public class BsPermission implements java.io.Serializable {
     private Object permissionDel;
 
     @Transient
-    @JsonBackReference
     private Set<BsPermission> nextBsPermission;
 
 

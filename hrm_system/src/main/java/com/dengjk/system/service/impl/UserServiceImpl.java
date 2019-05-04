@@ -12,19 +12,21 @@ import com.dengjk.system.dao.RoleRepository;
 import com.dengjk.system.dao.UserRepository;
 import com.dengjk.system.service.PermissionService;
 import com.dengjk.system.service.UserService;
-import com.google.common.collect.Sets;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.crypto.hash.Md5Hash;
+import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.Subject;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Dengjk
@@ -60,6 +62,9 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public Result addUser(BsUser bsUser) {
+        /**秘密加密*/
+        String password = new Md5Hash(bsUser.getPassword(), bsUser.getMobile(), 3).toString();
+        bsUser.setPassword(password);
         userRepository.save(bsUser);
         return ResultUtil.success("添加成功");
     }
@@ -128,6 +133,20 @@ public class UserServiceImpl implements UserService {
 
 
     /**
+     * 通过shiro-token获取用户信息
+     *
+     * @param authorization
+     * @return
+     */
+    @Override
+    public Result userInfoByShiro(String authorization) {
+        Subject subject = SecurityUtils.getSubject();
+        PrincipalCollection principals = subject.getPrincipals();
+        BsUser bsUser = (BsUser) principals.getPrimaryPrincipal();
+        return this.getUserInfo(bsUser.getId());
+    }
+
+    /**
      * 通过jwt-token获取用户信息
      *
      * @param token
@@ -137,32 +156,49 @@ public class UserServiceImpl implements UserService {
     public Result userInfo(String token) throws LoginErrorException {
         token = StringUtils.remove(token, "Bearer ");
         Claims claims = jwtUtils.parseJwt(token);
-        Optional<BsUser> byId = userRepository.findById(claims.getId());
+        return getUserInfo(claims.getId());
+    }
+
+
+    public Result getUserInfo(String id) {
+        Optional<BsUser> byId = userRepository.findById(id);
         if (byId.isPresent()) {
             /**渲染权限明细*/
             Set<BsRole> roles = byId.get().getRoles();
             roles.forEach(x -> {
                 Set<BsPermission> permissions = x.getPermissions();
-                permissions.forEach(y -> {
-                    String pid = y.getPid();
-                    if (StringUtils.isNotEmpty(pid)) {
-                        /**要去寻找他们的上一级*/
-                        BsPermission allByPid = permissionRepository.findByPid(pid);
-                        allByPid.setNextBsPermission(Sets.newHashSet(y));
-                        if (StringUtils.isNotEmpty(allByPid.getPid())) {
-                            BsPermission allByPid2 = permissionRepository.findByPid(pid);
-                            allByPid2.setNextBsPermission(Sets.newHashSet(allByPid));
-                            BeanUtils.copyProperties(y, allByPid2);
-                        }
-                    }
-                    y.setPermissionDel(permissionService.findPermissionDel(y.getType(), y.getId()));
+                /**并且要通过当前权限去查询是否有下级权限-如果有pid的话,说明他一定是其他权限的下级权限*/
+                Set<BsPermission> pidIsNull = permissions.stream().filter(y -> StringUtils.isEmpty(y.getPid())).collect(Collectors.toSet());
+                pidIsNull.forEach(y -> {
+                    Set<BsPermission> byPid = permissionRepository.findByPid(y.getId());
+                    this.recursionFindPerm(byPid);
+                    y.setNextBsPermission(byPid);
                 });
+                x.setPermissions(pidIsNull);
             });
             return ResultUtil.success(byId.get());
         }
-        return ResultUtil.notExist("或者失败");
+        return null;
     }
 
+
+    /**
+     * 递归获取权限列表-分了层级
+     *
+     * @param bsPermissions
+     */
+    @Override
+    public void recursionFindPerm(Set<BsPermission> bsPermissions) {
+        bsPermissions.forEach(z -> {
+            Set<BsPermission> byPi = permissionRepository.findByPid(z.getId());
+            byPi = byPi.stream().sorted(Comparator.comparing(x -> x.getSort())).collect(Collectors.toSet());
+            if (CollectionUtils.isEmpty(byPi)) {
+                return;
+            }
+            z.setNextBsPermission(byPi);
+            this.recursionFindPerm(byPi);
+        });
+    }
 
     /**
      * 使用shiro模拟用户登入
@@ -176,8 +212,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public Result loginByShiro(String mobile, String password) throws LoginErrorException {
         try {
-            /**对用于的密码进行加密-md5加盐*/
-            // password = new Md5Hash(password, mobile, 3).toString();
+            /**对用于的密码进行加密-md5  mobile手机号码是盐,  "3"的意思是循环加密多少次*/
+            password = new Md5Hash(password, mobile, 3).toString();
             /**获取UsernamePasswordToken对象*/
             UsernamePasswordToken userToken = new UsernamePasswordToken(mobile, password);
             /**获取Subject对象*/
@@ -185,8 +221,9 @@ public class UserServiceImpl implements UserService {
             String sessionId = (String) subject.getSession().getId();
             log.info("sessionId:" + sessionId);
             /**使用subject进行登入*/
+            userToken.setRememberMe(true);
             subject.login(userToken);
-            return ResultUtil.success("登入成功");
+            return ResultUtil.success(sessionId);
         } catch (AuthenticationException e) {
             throw new LoginErrorException("登入失败,请检查用户名和秘密");
         }

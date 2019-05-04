@@ -7,10 +7,15 @@ import com.dengjk.system.BsUser;
 import com.dengjk.system.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.catalina.servlet4preview.http.HttpServletRequest;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpSession;
+import java.security.Principal;
 import java.util.Map;
 
 /**
@@ -67,11 +72,22 @@ public class UserController extends BaseController {
         return userService.loginByShiro(mobile, password);
     }
 
+    @GetMapping("/logout")
+    @ApiOperation("使用shiro退出登入")
+    public Result logout() {
+        SecurityUtils.getSubject().logout();
+        return ResultUtil.success("退出成功");
+    }
 
-    @GetMapping(value = "/userInfo")
+
+    @GetMapping(value = "/userInfoByShiro")
     @ApiOperation("通过jwt-token获取用户信息 请求头中添加:Authorization=Bearer token")
-    public Result userInfo(@RequestHeader(name = "Authorization", required = true) String authorization) throws LoginErrorException {
-        return userService.userInfo(authorization);
+    //@RequiresPermissions("sys_user_delete")
+    public Result userInfoByShiro(@RequestHeader(name = "Authorization", required = true) String authorization, HttpSession session, HttpServletRequest request
+            , Principal principal
+    ) throws LoginErrorException {
+        Cookie[] cookies = request.getCookies();
+        return userService.userInfoByShiro(authorization);
     }
 
 

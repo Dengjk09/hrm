@@ -43,7 +43,7 @@ public class MyRealm extends AuthorizingRealm {
         String username = userToken.getUsername();
         String password = new String(userToken.getPassword());
         BsUser user = userRepository.findAllByMobile(username);
-        if (user != null && !StringUtils.equals(password, user.getMobile())) {
+        if (user != null && StringUtils.equals(password, user.getPassword())) {
             /**构造一个简单的AuthenticationInfo返回*/
             SimpleAuthenticationInfo info = new SimpleAuthenticationInfo(user, password, username);
             return info;
@@ -65,6 +65,7 @@ public class MyRealm extends AuthorizingRealm {
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
         /**获取认证之后的用户信息*/
         BsUser user = (BsUser) principalCollection.getPrimaryPrincipal();
+        user = userRepository.findAllByMobile(user.getMobile());
         SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
         /**把用户的角色和权限赋值到 SimpleAuthenticationInfo对象中去*/
         Set<String> roles = user.getRoles().stream().map(x -> x.getName()).collect(Collectors.toSet());

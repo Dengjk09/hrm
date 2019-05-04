@@ -2,9 +2,11 @@ package com.dengjk.system.service;
 
 import com.dengjk.common.exception.LoginErrorException;
 import com.dengjk.common.utils.Result;
+import com.dengjk.system.BsPermission;
 import com.dengjk.system.BsUser;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Dengjk
@@ -32,4 +34,8 @@ public interface UserService {
     Result userInfo(String authorization) throws LoginErrorException;
 
     Result loginByShiro(String mobile, String password) throws LoginErrorException;
+
+    void recursionFindPerm(Set<BsPermission> bsPermissions);
+
+    Result userInfoByShiro(String authorization);
 }
