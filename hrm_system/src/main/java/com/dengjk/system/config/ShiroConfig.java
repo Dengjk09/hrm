@@ -142,6 +142,7 @@ public class ShiroConfig {
         permisMap.put("/sys/user/index", "anon");
         permisMap.put("sys/user/login", "anon");
         permisMap.put("/loginError", "anon");
+        permisMap.put("/sys/security/**", "anon");
         permisMap.put("/sys/user/loginByShiro", "anon");
         /**
          * permisMap.put("/sys/user/**", "roles[管理员]");

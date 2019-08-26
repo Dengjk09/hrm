@@ -20,7 +20,7 @@ public class ResultUtil {
     public static Result authFail(Object object) {
         Result<Object> result = new Result<>();
         result.setCode(HttpStatus.AUTH_FAIL.getCode());
-        result.setMsg(HttpStatus.AUTH_FAIL.getMsg() + ":" + object.toString());
+        result.setMsg(HttpStatus.AUTH_FAIL.getMsg() + ":" + object);
         result.setData(null);
         return result;
     }
@@ -48,6 +48,15 @@ public class ResultUtil {
         result.setData(null);
         return result;
     }
+
+    public static Result noAccess(Object object) {
+        Result<Object> result = new Result<>();
+        result.setCode(HttpStatus.FORBIDDEN.getCode());
+        result.setMsg(HttpStatus.FORBIDDEN.getMsg() + ":" + object.toString());
+        result.setData(null);
+        return result;
+    }
+
 
     public static Result verifiyError(Object object) {
         Result<Object> result = new Result<>();
