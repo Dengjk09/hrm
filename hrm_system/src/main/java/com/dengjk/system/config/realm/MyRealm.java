@@ -25,6 +25,7 @@ public class MyRealm extends AuthorizingRealm {
     private UserRepository userRepository;
 
 
+    @Override
     public void setName(String name) {
         super.setName("myRealm");
     }
@@ -57,9 +58,14 @@ public class MyRealm extends AuthorizingRealm {
      * 授权方法
      * <p>
      * 把所有的角色和权限赋值到SimpleAuthorizationInfo中去
+     * <p>
+     * 调用授权的触发条件：
+     * 使用了权限注解
      *
-     * @param principalCollection
-     * @return
+     * @ RequiresPermissions("sys_user_delete")
+     * @ RequiresRoles()
+     * 拦截器中配置了 permisMap.put("/sys/user/**", "roles[管理员]");
+     * 手动调用 subject.hasRole(“admin”) 或 subject.isPermitted(“admin”)：自己去调用这个是否有什么角色或者是否有什么权限的时候
      */
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {

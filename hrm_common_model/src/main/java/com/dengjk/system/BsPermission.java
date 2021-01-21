@@ -17,7 +17,7 @@ import java.util.Set;
  * @version 1.0.0 2019-04-14
  */
 @Entity
-@Table(name = "BS_PERMISSION")
+@Table(name = "bs_permission")
 @DynamicUpdate(value = true)
 @DynamicInsert(value = true)
 @Getter

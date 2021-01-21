@@ -13,7 +13,7 @@ import javax.persistence.Table;
  * @version 1.0.0 2019-04-14
  */
 @Entity
-@Table(name = "PE_PERMISSION_POINT")
+@Table(name = "pe_permission_point")
 @Data
 public class PePermissionPoint implements java.io.Serializable {
     /** 版本号 */

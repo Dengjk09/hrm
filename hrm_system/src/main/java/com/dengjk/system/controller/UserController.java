@@ -10,6 +10,7 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -82,7 +83,7 @@ public class UserController extends BaseController {
 
     @GetMapping(value = "/userInfoByShiro")
     @ApiOperation("通过jwt-token获取用户信息 请求头中添加:Authorization=Bearer token")
-    //@RequiresPermissions("sys_user_delete")
+    @RequiresPermissions("sys_user_delete")
     public Result userInfoByShiro(@RequestHeader(name = "Authorization", required = true) String authorization, HttpSession session, HttpServletRequest request
             , Principal principal
     ) throws LoginErrorException {

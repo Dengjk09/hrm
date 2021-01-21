@@ -24,7 +24,7 @@ import javax.persistence.Table;
  * @version 1.0.0 2019-04-14
  */
 @Entity
-@Table(name = "PE_PERMISSION_API")
+@Table(name = "pe_permission_api")
 @Data
 public class PePermissionApi implements java.io.Serializable {
     /** 版本号 */

@@ -25,7 +25,7 @@ import java.util.Set;
  * @LastModifiedDate @CreatedDate自己更新时间
  */
 @Entity
-@Table(name = "BS_USER")
+@Table(name = "bs_user")
 @DynamicUpdate(value = true)
 @DynamicInsert(value = true)
 @Getter
